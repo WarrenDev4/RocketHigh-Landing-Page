@@ -11,14 +11,11 @@
     
     <style>
         :root {
-            /* Your Brand Color */
             --brand-purple: #4038d5; 
             --primary-glow: rgba(64, 56, 213, 0.4);
-            
-            /* Dark Theme Colors */
             --bg-black: #050505;
             --bg-card: #111111;
-            --bg-nav: rgba(5, 5, 5, 0.9);
+            --bg-nav: rgba(5, 5, 5, 0.95);
             --text-main: #ffffff;
             --text-dim: #94a3b8;
             --border: #222222;
@@ -29,6 +26,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            scroll-behavior: smooth;
         }
 
         body {
@@ -42,12 +40,12 @@
         .container {
             max-width: 1100px;
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 0 1.5rem;
         }
 
-        /* --- Navigation --- */
+        /* --- Updated Mobile-Friendly Navigation --- */
         nav {
-            height: 110px; /* Accommodating the large logo */
+            height: 100px;
             display: flex;
             align-items: center;
             position: sticky;
@@ -68,19 +66,19 @@
         .logo {
             display: flex;
             align-items: center;
-            text-decoration: none;
+            z-index: 1001;
         }
 
         .project-logo {
-            height: 75px; /* Large logo size */
+            height: 75px; 
             width: auto;
-            display: block;
-            object-fit: contain;
+            transition: var(--transition);
         }
 
+        /* Desktop Links */
         .nav-links {
             display: flex;
-            gap: 1.5rem;
+            gap: 2rem;
             align-items: center;
         }
 
@@ -92,8 +90,23 @@
             font-size: 0.95rem;
         }
 
-        .nav-links a.nav-text:hover {
-            color: white;
+        .nav-links a.nav-text:hover { color: white; }
+
+        /* Hamburger Menu Toggle (Hidden on Desktop) */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            cursor: pointer;
+            z-index: 1001;
+            padding: 10px;
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 2px;
+            background-color: white;
+            transition: var(--transition);
         }
 
         /* --- Buttons --- */
@@ -101,15 +114,15 @@
             display: inline-block;
             padding: 12px 28px;
             border-radius: 10px;
-            font-weight: 600;
+            font-weight: 700;
             text-decoration: none;
             transition: var(--transition);
             cursor: pointer;
             border: none;
             font-size: 0.95rem;
+            text-align: center;
         }
 
-        /* Updated "Get RocketHigh" Button Style */
         .btn-primary {
             background-color: var(--brand-purple);
             color: white !important;
@@ -119,18 +132,17 @@
         .btn:hover {
             transform: translateY(-2px);
             filter: brightness(1.2);
-            box-shadow: 0 6px 20px 0 var(--primary-glow);
         }
 
         /* --- Hero Section --- */
         .hero {
             text-align: center;
-            padding: 100px 0 80px;
-            background: radial-gradient(circle at top, #16143a 0%, #050505 60%);
+            padding: 80px 0;
+            background: radial-gradient(circle at top, #16143a 0%, #050505 70%);
         }
 
         .hero h1 {
-            font-size: 4rem;
+            font-size: clamp(2.2rem, 8vw, 4rem); /* Fluid typography */
             line-height: 1.1;
             margin-bottom: 1.5rem;
             letter-spacing: -0.03em;
@@ -144,80 +156,87 @@
         }
 
         .hero p {
-            font-size: 1.25rem;
+            font-size: clamp(1rem, 4vw, 1.25rem);
             color: var(--text-dim);
             max-width: 750px;
-            margin: 0 auto 3rem;
-        }
-
-        /* Screenshot Container */
-        .screenshot-container {
-            margin-top: 50px;
-            border-radius: 20px;
-            background: var(--bg-card);
-            padding: 8px;
-            border: 1px solid var(--border);
-            box-shadow: 0 0 40px rgba(64, 56, 213, 0.2);
-        }
-
-        .mock-ui img {
-            width: 100%;
-            border-radius: 14px;
-            display: block;
-            border: 1px solid #333;
+            margin: 0 auto 2.5rem;
         }
 
         /* --- Features --- */
-        #features { padding: 100px 0; }
+        #features { padding: 80px 0; }
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-top: 50px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 40px;
         }
 
         .feature-card {
-            padding: 40px;
+            padding: 2.5rem;
             border-radius: 20px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             transition: var(--transition);
         }
 
-        .feature-card:hover {
-            border-color: var(--brand-purple);
-            transform: translateY(-5px);
-        }
-
         .feature-icon {
             font-size: 2rem;
             color: var(--brand-purple);
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
 
-        /* --- CTA --- */
+        /* --- CTA Banner --- */
         .cta-banner {
             background: linear-gradient(135deg, #16143a 0%, #050505 100%);
             border: 1px solid var(--border);
             border-radius: 30px;
-            padding: 80px 40px;
+            padding: 60px 20px;
             text-align: center;
-            margin: 100px 0;
+            margin: 60px 0;
         }
 
         footer {
-            padding: 60px 0;
+            padding: 40px 0;
             border-top: 1px solid var(--border);
             text-align: center;
             color: var(--text-dim);
         }
 
+        /* --- Mobile Responsive Rules --- */
         @media (max-width: 768px) {
-            nav { height: auto; padding: 20px 0; }
-            .nav-container { flex-direction: column; gap: 20px; }
-            .hero h1 { font-size: 2.5rem; }
-            .project-logo { height: 50px; }
-            .nav-links { flex-direction: column; width: 100%; text-align: center; }
+            nav { height: 80px; }
+            .project-logo { height: 45px; } /* Smaller logo on mobile */
+
+            .menu-toggle { display: flex; }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                height: 100vh;
+                background: #0a0a0a;
+                flex-direction: column;
+                justify-content: center;
+                transition: 0.4s ease-in-out;
+                border-left: 1px solid var(--border);
+                box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+            }
+
+            .nav-links.active { right: 0; }
+
+            .nav-links a.nav-text {
+                font-size: 1.5rem;
+                width: 100%;
+                text-align: center;
+            }
+
+            .hero { padding: 60px 0; }
+            .hero-btns .btn { width: 100%; } /* Full width buttons on mobile */
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -228,10 +247,17 @@
             <a href="#" class="logo">
                 <img src="images/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh Logo" class="project-logo">
             </a>
-            <div class="nav-links">
+
+            <!-- Hamburger Icon -->
+            <div class="menu-toggle" id="mobile-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <div class="nav-links" id="nav-list">
                 <a href="#features" class="nav-text">Features</a>
-                <a href="#how-it-works" class="nav-text">How it Works</a>
-                <!-- Updated Brand Purple Button -->
+                <a href="#download" class="nav-text">How it Works</a>
                 <a href="#download" class="btn btn-primary">Get RocketHigh</a>
             </div>
         </div>
@@ -244,17 +270,15 @@
                 proposals, invoices, and emails in seconds.</p>
             
             <div class="hero-btns">
-                <!-- Matching Brand Purple for Hero Button -->
                 <a href="#download" class="btn btn-primary" style="padding: 18px 45px; font-size: 1.1rem;">Coming Soon!</a>
             </div>
-
         </div>
     </header>
 
     <section id="features">
         <div class="container">
             <div style="text-align: center;">
-                <h2 style="font-size: 2.5rem;">Business Ops, Automated</h2>
+                <h2 style="font-size: 2.2rem;">Business Ops, Automated</h2>
                 <p style="color: var(--text-dim); margin-top: 10px;">Spend more time doing what you love.</p>
             </div>
 
@@ -280,14 +304,14 @@
 
     <section id="download" class="container">
         <div class="cta-banner">
-            <h2 style="font-size: 2.5rem; margin-bottom: 1.5rem;">Ready to reclaim your time?</h2>
+            <h2 style="font-size: clamp(1.8rem, 5vw, 2.5rem); margin-bottom: 1rem;">Ready to reclaim your time?</h2>
             <p style="color: var(--text-dim); margin-bottom: 2.5rem;">Coming Soon to iOS, Android, and Web!</p>
             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="#" class="btn btn-primary">
-                    <i class="fa-brands fa-apple"></i> Download iOS
+                <a href="#" class="btn btn-primary" style="flex: 1; min-width: 200px;">
+                    <i class="fa-brands fa-apple"></i> iOS
                 </a>
-                <a href="#" class="btn btn-primary">
-                    <i class="fa-brands fa-google-play"></i> Download Android
+                <a href="#" class="btn btn-primary" style="flex: 1; min-width: 200px;">
+                    <i class="fa-brands fa-google-play"></i> Android
                 </a>
             </div>
         </div>
@@ -295,10 +319,33 @@
 
     <footer>
         <div class="container">
-            <img src="images/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh" style="height: 50px; margin-bottom: 20px; opacity: 0.8;">
-            <p>&copy; 2026 RocketHigh AI. All rights reserved.</p>
+            <img src="images/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh" style="height: 45px; margin-bottom: 20px; opacity: 0.8;">
+            <p style="font-size: 0.85rem;">&copy; 2026 RocketHigh AI. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Simple JavaScript for Mobile Menu Toggle -->
+    <script>
+        const menuToggle = document.getElementById('mobile-menu');
+        const navList = document.getElementById('nav-list');
+
+        menuToggle.addEventListener('click', () => {
+            navList.classList.toggle('active');
+            
+            // Optional: Animate hamburger to X
+            const spans = menuToggle.getElementsByTagName('span');
+            spans[0].style.transform = navList.classList.contains('active') ? 'rotate(45deg) translate(5px, 5px)' : 'none';
+            spans[1].style.opacity = navList.classList.contains('active') ? '0' : '1';
+            spans[2].style.transform = navList.classList.contains('active') ? 'rotate(-45deg) translate(7px, -7px)' : 'none';
+        });
+
+        // Close menu when a link is clicked
+        document.querySelectorAll('.nav-text, .btn').forEach(link => {
+            link.addEventListener('click', () => {
+                navList.classList.remove('active');
+            });
+        });
+    </script>
 
 </body>
 </html>
