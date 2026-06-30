@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RocketHigh | AI-Powered Business Tools</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --brand-purple: #4038d5;
@@ -20,7 +20,11 @@
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        html.loaded body { opacity: 1; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -28,11 +32,22 @@
             color: var(--text-main);
             background-color: var(--bg-black);
             overflow-x: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
         .container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
 
-        /* NAV */
+        #scroll-progress {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--brand-purple), #7c74ff);
+            z-index: 2000;
+            transition: width 0.1s ease-out;
+        }
+
         nav {
             height: 100px;
             display: flex;
@@ -43,33 +58,41 @@
             backdrop-filter: blur(12px);
             z-index: 1000;
             border-bottom: 1px solid var(--border);
+            transition: height 0.3s ease, box-shadow 0.3s ease;
         }
+        nav.scrolled { height: 72px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+        nav.scrolled .project-logo { height: 50px; }
 
         .nav-container { display: flex; width: 100%; justify-content: space-between; align-items: center; }
         .logo { display: flex; align-items: center; z-index: 1001; }
-        .project-logo { height: 75px; width: auto; }
+        .project-logo { height: 75px; width: auto; transition: height 0.3s ease; }
 
         .nav-links { display: flex; gap: 2rem; align-items: center; }
         .nav-links a.nav-text {
+            position: relative;
             text-decoration: none;
             color: var(--text-dim);
             font-weight: 600;
             transition: var(--transition);
             font-size: 0.95rem;
+            padding-bottom: 4px;
+        }
+        .nav-links a.nav-text::after {
+            content: '';
+            position: absolute;
+            left: 0; bottom: -2px;
+            width: 0%; height: 2px;
+            background: var(--brand-purple);
+            transition: width 0.25s ease;
         }
         .nav-links a.nav-text:hover { color: white; }
+        .nav-links a.nav-text:hover::after,
+        .nav-links a.nav-text.active::after { width: 100%; }
+        .nav-links a.nav-text.active { color: white; }
 
-        .menu-toggle {
-            display: none;
-            flex-direction: column;
-            gap: 6px;
-            cursor: pointer;
-            z-index: 1001;
-            padding: 10px;
-        }
+        .menu-toggle { display: none; flex-direction: column; gap: 6px; cursor: pointer; z-index: 1001; padding: 10px; }
         .menu-toggle span { width: 25px; height: 2px; background-color: white; transition: var(--transition); }
 
-        /* BUTTONS */
         .btn {
             display: inline-block;
             padding: 12px 28px;
@@ -81,28 +104,30 @@
             border: none;
             font-size: 0.95rem;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
-        .btn-primary {
-            background-color: var(--brand-purple);
-            color: white !important;
-            box-shadow: 0 4px 14px 0 var(--primary-glow);
-        }
-        .btn-outline {
-            background: transparent;
-            color: white !important;
-            border: 1.5px solid #333;
-        }
+        .btn-primary { background-color: var(--brand-purple); color: white !important; box-shadow: 0 4px 14px 0 var(--primary-glow); }
+        .btn-outline { background: transparent; color: white !important; border: 1.5px solid #333; }
         .btn:hover { transform: translateY(-2px); filter: brightness(1.15); }
+        .btn:active { transform: translateY(0) scale(0.97); }
 
-        /* HERO */
-        .hero {
-            text-align: center;
-            padding: 100px 0 80px;
-            background: radial-gradient(circle at top, #16143a 0%, #050505 65%);
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.35);
+            transform: scale(0);
+            animation: ripple-anim 0.55s ease-out;
+            pointer-events: none;
         }
+        @keyframes ripple-anim { to { transform: scale(3.5); opacity: 0; } }
+
+        .hero { text-align: center; padding: 100px 0 80px; background: radial-gradient(circle at top, #16143a 0%, #050505 65%); }
 
         .hero-badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             background: rgba(64, 56, 213, 0.15);
             border: 1px solid rgba(64, 56, 213, 0.4);
             color: #a89fff;
@@ -114,28 +139,20 @@
             letter-spacing: 0.04em;
             text-transform: uppercase;
         }
-
-        .hero h1 {
-            font-size: clamp(2.2rem, 8vw, 4.2rem);
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            letter-spacing: -0.03em;
-            font-weight: 800;
+        .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #a89fff; animation: pulse 1.8s infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(168,159,255,0.6); }
+            70% { box-shadow: 0 0 0 7px rgba(168,159,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(168,159,255,0); }
         }
 
+        .hero h1 { font-size: clamp(2.2rem, 8vw, 4.2rem); line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.03em; font-weight: 800; }
         .gradient-text {
             background: linear-gradient(90deg, #7c74ff, #b1a9ff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        .hero p {
-            font-size: clamp(1rem, 3vw, 1.2rem);
-            color: var(--text-dim);
-            max-width: 680px;
-            margin: 0 auto 2.5rem;
-        }
-
+        .hero p { font-size: clamp(1rem, 3vw, 1.2rem); color: var(--text-dim); max-width: 680px; margin: 0 auto 2.5rem; }
         .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
         .hero-stats {
@@ -151,14 +168,11 @@
         .stat-num { font-size: 1.8rem; font-weight: 800; color: white; }
         .stat-label { font-size: 0.85rem; color: var(--text-dim); margin-top: 4px; }
 
-        /* WHO IT'S FOR */
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .reveal.in-view { opacity: 1; transform: translateY(0); }
+
         #who { padding: 80px 0; }
-        .who-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1rem;
-            margin-top: 40px;
-        }
+        .who-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 40px; }
         .who-card {
             padding: 1.5rem;
             border-radius: 14px;
@@ -167,7 +181,9 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+            transition: var(--transition);
         }
+        .who-card:hover { border-color: rgba(64, 56, 213, 0.45); transform: translateY(-3px); }
         .who-icon {
             width: 44px;
             height: 44px;
@@ -183,22 +199,10 @@
         .who-label { font-size: 0.95rem; font-weight: 600; color: white; }
         .who-sub { font-size: 0.8rem; color: var(--text-dim); margin-top: 2px; }
 
-        /* FEATURES */
         #features { padding: 80px 0; }
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 40px;
-        }
-        .feature-card {
-            padding: 2rem;
-            border-radius: 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            transition: var(--transition);
-        }
-        .feature-card:hover { border-color: rgba(64, 56, 213, 0.5); transform: translateY(-3px); }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 40px; }
+        .feature-card { padding: 2rem; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border); transition: var(--transition); }
+        .feature-card:hover { border-color: rgba(64, 56, 213, 0.5); transform: translateY(-5px); box-shadow: 0 16px 40px rgba(64, 56, 213, 0.12); }
         .feature-icon {
             width: 48px;
             height: 48px;
@@ -210,7 +214,9 @@
             font-size: 1.3rem;
             color: #a89fff;
             margin-bottom: 1.2rem;
+            transition: var(--transition);
         }
+        .feature-card:hover .feature-icon { background: var(--brand-purple); color: white; transform: scale(1.08) rotate(-4deg); }
         .feature-card h3 { font-size: 1.1rem; margin-bottom: 0.6rem; color: white; }
         .feature-card p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.7; }
         .feature-tag {
@@ -224,15 +230,8 @@
             border-radius: 6px;
         }
 
-        /* HOW IT WORKS */
         #how { padding: 80px 0; }
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 2rem;
-            margin-top: 50px;
-            position: relative;
-        }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; margin-top: 50px; }
         .step { text-align: center; }
         .step-num {
             width: 52px;
@@ -247,29 +246,17 @@
             font-weight: 800;
             color: #a89fff;
             margin: 0 auto 1rem;
+            transition: var(--transition);
         }
+        .step:hover .step-num { background: var(--brand-purple); color: white; transform: scale(1.1); }
         .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
         .step p { font-size: 0.88rem; color: var(--text-dim); line-height: 1.7; }
 
-        /* PRICING */
         #pricing { padding: 80px 0; }
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-top: 40px;
-        }
-        .pricing-card {
-            padding: 2rem;
-            border-radius: 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-        }
-        .pricing-card.featured {
-            border-color: var(--brand-purple);
-            background: linear-gradient(160deg, #0e0d2a, #111111);
-            position: relative;
-        }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-top: 40px; }
+        .pricing-card { padding: 2rem; border-radius: 20px; background: var(--bg-card); border: 1px solid var(--border); transition: var(--transition); }
+        .pricing-card:hover { transform: translateY(-4px); }
+        .pricing-card.featured { border-color: var(--brand-purple); background: linear-gradient(160deg, #0e0d2a, #111111); position: relative; }
         .pricing-badge {
             position: absolute;
             top: -13px;
@@ -288,66 +275,57 @@
         .pricing-price span { font-size: 1rem; font-weight: 400; color: var(--text-dim); }
         .pricing-desc { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
         .pricing-features { list-style: none; margin-bottom: 2rem; }
-        .pricing-features li {
-            font-size: 0.88rem;
-            color: var(--text-dim);
-            padding: 6px 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .pricing-features li { font-size: 0.88rem; color: var(--text-dim); padding: 6px 0; display: flex; align-items: center; gap: 8px; }
         .pricing-features li i { color: #a89fff; font-size: 0.9rem; }
 
-        /* CTA */
-        .cta-banner {
-            background: linear-gradient(135deg, #16143a 0%, #050505 100%);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 70px 20px;
-            text-align: center;
-            margin: 60px 0;
-        }
+        .cta-banner { background: linear-gradient(135deg, #16143a 0%, #050505 100%); border: 1px solid var(--border); border-radius: 30px; padding: 70px 20px; text-align: center; margin: 60px 0; }
         .cta-banner h2 { font-size: clamp(1.8rem, 5vw, 2.8rem); margin-bottom: 1rem; }
         .cta-banner p { color: var(--text-dim); margin-bottom: 2.5rem; font-size: 1.05rem; }
 
-        /* STORE BADGES */
         .store-badges { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-        .store-btn {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: #1a1a1a;
-            border: 1.5px solid #333;
-            border-radius: 12px;
-            padding: 12px 22px;
-            text-decoration: none;
-            color: white;
-            transition: var(--transition);
-            min-width: 180px;
-        }
-        .store-btn:hover { border-color: #555; transform: translateY(-2px); }
-        .store-btn-icon { font-size: 1.8rem; color: white; }
-        .store-btn-text { text-align: left; }
-        .store-btn-sub { font-size: 0.7rem; color: var(--text-dim); display: block; }
-        .store-btn-name { font-size: 1rem; font-weight: 700; display: block; }
+        .store-badges a { display: inline-block; transition: var(--transition); border-radius: 10px; }
+        .store-badges a:hover { transform: translateY(-3px); filter: brightness(1.1); }
+        .store-badges img { height: 54px; display: block; border-radius: 10px; }
 
-        /* FOOTER */
-        footer {
-            padding: 50px 0 30px;
-            border-top: 1px solid var(--border);
-            text-align: center;
-            color: var(--text-dim);
-        }
+        footer { padding: 50px 0 30px; border-top: 1px solid var(--border); text-align: center; color: var(--text-dim); }
         .footer-links { display: flex; justify-content: center; gap: 2rem; margin: 1.5rem 0; flex-wrap: wrap; }
         .footer-links a { color: var(--text-dim); text-decoration: none; font-size: 0.88rem; transition: var(--transition); }
         .footer-links a:hover { color: white; }
 
-        /* SECTION HEADERS */
         .section-header { text-align: center; margin-bottom: 10px; }
         .section-header h2 { font-size: clamp(1.8rem, 5vw, 2.4rem); font-weight: 800; }
         .section-header p { color: var(--text-dim); margin-top: 10px; font-size: 1rem; max-width: 600px; margin-left: auto; margin-right: auto; }
 
-        /* MOBILE */
+        #back-to-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: var(--brand-purple);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(64,56,213,0.4);
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease, filter 0.2s ease;
+            z-index: 999;
+        }
+        #back-to-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        #back-to-top:hover { filter: brightness(1.2); }
+
+        img { transition: opacity 0.4s ease; }
+        img.img-loading { opacity: 0; }
+
+        a:focus-visible, button:focus-visible { outline: 2px solid #a89fff; outline-offset: 3px; }
+
         @media (max-width: 768px) {
             nav { height: 80px; }
             .project-logo { height: 45px; }
@@ -368,18 +346,25 @@
             .hero-btns .btn { width: 100%; }
             .hero-stats { gap: 2rem; }
             .features-grid { grid-template-columns: 1fr; }
-            .store-btn { min-width: 160px; }
+            #back-to-top { bottom: 16px; right: 16px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+            html { scroll-behavior: auto; }
         }
     </style>
 </head>
 <body>
 
-<nav>
+<div id="scroll-progress"></div>
+
+<nav id="main-nav">
     <div class="container nav-container">
         <a href="#" class="logo">
             <img src="images/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh Logo" class="project-logo">
         </a>
-        <div class="menu-toggle" id="mobile-menu">
+        <div class="menu-toggle" id="mobile-menu" role="button" aria-label="Toggle menu">
             <span></span><span></span><span></span>
         </div>
         <div class="nav-links" id="nav-list">
@@ -394,7 +379,7 @@
 
 <header class="hero">
     <div class="container">
-        <div class="hero-badge">✦ Now in Development</div>
+        <div class="hero-badge"><span class="pulse-dot"></span>Now in Development</div>
         <h1>Level up your business.<br><span class="gradient-text">With AI.</span></h1>
         <p>RocketHigh handles the business side so you can focus on the work. AI-powered proposals, invoices, contracts, and client communication — ready in seconds, not hours.</p>
         <div class="hero-btns">
@@ -403,7 +388,7 @@
         </div>
         <div class="hero-stats">
             <div class="stat-item">
-                <div class="stat-num">3</div>
+                <div class="stat-num" data-count="3">0</div>
                 <div class="stat-label">AI tools at launch</div>
             </div>
             <div class="stat-item">
@@ -420,33 +405,33 @@
 
 <section id="who">
     <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
             <h2>Built for every stage of business</h2>
             <p>Whether you're a solo freelancer or running a growing company, RocketHigh scales with you.</p>
         </div>
         <div class="who-grid">
-            <div class="who-card">
+            <div class="who-card reveal">
                 <div class="who-icon"><i class="fa-solid fa-laptop-code"></i></div>
                 <div>
                     <div class="who-label">Freelancers</div>
                     <div class="who-sub">Designers, developers, writers, consultants</div>
                 </div>
             </div>
-            <div class="who-card">
+            <div class="who-card reveal">
                 <div class="who-icon"><i class="fa-solid fa-store"></i></div>
                 <div>
                     <div class="who-label">Small businesses</div>
                     <div class="who-sub">Agencies, studios, service providers</div>
                 </div>
             </div>
-            <div class="who-card">
+            <div class="who-card reveal">
                 <div class="who-icon"><i class="fa-solid fa-rocket"></i></div>
                 <div>
                     <div class="who-label">Startups</div>
                     <div class="who-sub">Early teams moving fast without admin overhead</div>
                 </div>
             </div>
-            <div class="who-card">
+            <div class="who-card reveal">
                 <div class="who-icon"><i class="fa-solid fa-building"></i></div>
                 <div>
                     <div class="who-label">Enterprises</div>
@@ -459,42 +444,42 @@
 
 <section id="features">
     <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
             <h2>Business ops, automated</h2>
             <p>Describe your situation in plain English. RocketHigh handles the rest.</p>
         </div>
         <div class="features-grid">
-            <div class="feature-card">
+            <div class="feature-card reveal">
                 <div class="feature-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
                 <h3>AI proposal writer</h3>
                 <p>Stop staring at blank pages. Describe your client and project — get a tailored, professional proposal in under 30 seconds that's ready to send.</p>
                 <span class="feature-tag">Launching Day 1</span>
             </div>
-            <div class="feature-card">
+            <div class="feature-card reveal">
                 <div class="feature-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                 <h3>Smart invoice generator</h3>
                 <p>Input your project details and get a clean, professional invoice instantly. Track payment status and let AI handle the follow-up emails for you.</p>
                 <span class="feature-tag">Launching Day 1</span>
             </div>
-            <div class="feature-card">
+            <div class="feature-card reveal">
                 <div class="feature-icon"><i class="fa-solid fa-comment-dots"></i></div>
                 <h3>AI client email writer</h3>
                 <p>Raising rates? Pushing back on scope? Chasing a late payment? Paste your situation and get 2–3 professional, ready-to-send email drafts in seconds.</p>
                 <span class="feature-tag">Launching Day 1</span>
             </div>
-            <div class="feature-card">
+            <div class="feature-card reveal">
                 <div class="feature-icon"><i class="fa-solid fa-file-contract"></i></div>
                 <h3>Contract generator</h3>
                 <p>Generate professional contracts tailored to your project and client. Protect yourself without spending hours on legal documents.</p>
                 <span class="feature-tag">Coming in Phase 2</span>
             </div>
-            <div class="feature-card">
+            <div class="feature-card reveal">
                 <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
                 <h3>Earnings & client insights</h3>
                 <p>Discover which clients are most profitable, track your real hourly rate, and get AI-powered recommendations on when and how to raise your rates.</p>
                 <span class="feature-tag">Coming in Phase 2</span>
             </div>
-            <div class="feature-card">
+            <div class="feature-card reveal">
                 <div class="feature-icon"><i class="fa-solid fa-brain"></i></div>
                 <h3>AI second brain</h3>
                 <p>Your notes, client briefs, deadlines, and tasks — all organized automatically. A smart workspace that surfaces what matters right now.</p>
@@ -506,22 +491,22 @@
 
 <section id="how">
     <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
             <h2>How it works</h2>
             <p>Professional output in three steps. No templates, no formatting, no wasted time.</p>
         </div>
         <div class="steps">
-            <div class="step">
+            <div class="step reveal">
                 <div class="step-num">1</div>
                 <h3>Describe your situation</h3>
                 <p>Tell RocketHigh what you need in plain English — the client, the project, the problem. No forms, no templates.</p>
             </div>
-            <div class="step">
+            <div class="step reveal">
                 <div class="step-num">2</div>
                 <h3>AI generates it instantly</h3>
                 <p>Our AI produces professional, tailored output in seconds — proposals, invoices, emails, and contracts that sound like you.</p>
             </div>
-            <div class="step">
+            <div class="step reveal">
                 <div class="step-num">3</div>
                 <h3>Review, edit, and send</h3>
                 <p>Make any tweaks you want and send directly to your client. What used to take hours now takes under a minute.</p>
@@ -532,12 +517,12 @@
 
 <section id="pricing">
     <div class="container">
-        <div class="section-header">
+        <div class="section-header reveal">
             <h2>Simple, honest pricing</h2>
             <p>Start free, pay when it saves you real time. Cancel anytime.</p>
         </div>
         <div class="pricing-grid">
-            <div class="pricing-card">
+            <div class="pricing-card reveal">
                 <div class="pricing-tier">Free</div>
                 <div class="pricing-price">$0 <span>/ month</span></div>
                 <div class="pricing-desc">Try it out — no credit card needed.</div>
@@ -549,7 +534,7 @@
                 </ul>
                 <a href="#download" class="btn btn-outline" style="width:100%; display:block;">Get started free</a>
             </div>
-            <div class="pricing-card featured">
+            <div class="pricing-card featured reveal">
                 <div class="pricing-badge">Most popular</div>
                 <div class="pricing-tier">Pro</div>
                 <div class="pricing-price">$19 <span>/ month</span></div>
@@ -563,7 +548,7 @@
                 </ul>
                 <a href="#download" class="btn btn-primary" style="width:100%; display:block;">Get early access</a>
             </div>
-            <div class="pricing-card">
+            <div class="pricing-card reveal">
                 <div class="pricing-tier">Business</div>
                 <div class="pricing-price">$99 <span>/ month</span></div>
                 <div class="pricing-desc">For agencies and teams who need more power.</div>
@@ -581,25 +566,23 @@
 </section>
 
 <section id="download" class="container">
-    <div class="cta-banner">
+    <div class="cta-banner reveal">
         <h2>Ready to empower and streamline your business?</h2>
-        <p>Coming soon to iOS, Android, and Web. Early Access to be announced. </p>
-        <!-- Join the waitlist and get early access. -->
-                <div class="store-badges">
-                <a href="#">
-                    <img src="images/iphone-app-store-android-coming-soon.jpg" alt="Download on the App Store" style="height: 54px;">
-                </a>
-                <a href="#">
-                    <img src="images/google-play-badge-coming-soon-610x199.png" alt="Get it on Google Play" style="height: 54px;">
-                </a>
-            </div>
+        <p>Coming soon to iOS, Android, and Web. Early access to be announced.</p>
+        <div class="store-badges">
+            <a href="#">
+                <img src="images/iphone-app-store-android-coming-soon.jpg" alt="Coming soon to the App Store" class="img-loading">
+            </a>
+            <a href="#">
+                <img src="images/google-play-badge-coming-soon-610x199.png" alt="Coming soon to Google Play" class="img-loading">
+            </a>
         </div>
     </div>
 </section>
 
 <footer>
     <div class="container">
-        <img src="images/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh" style="height: 45px; margin-bottom: 20px; opacity: 0.8;">
+        <img src="images/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh" style="height: 45px; margin-bottom: 20px; opacity: 0.8;" class="img-loading">
         <div class="footer-links">
             <a href="#features">Features</a>
             <a href="#pricing">Pricing</a>
@@ -611,7 +594,11 @@
     </div>
 </footer>
 
+<button id="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
 <script>
+    document.documentElement.classList.add('loaded');
+
     const menuToggle = document.getElementById('mobile-menu');
     const navList = document.getElementById('nav-list');
     menuToggle.addEventListener('click', () => {
@@ -623,6 +610,88 @@
     });
     document.querySelectorAll('.nav-text, .btn').forEach(link => {
         link.addEventListener('click', () => navList.classList.remove('active'));
+    });
+
+    const progressBar = document.getElementById('scroll-progress');
+    const navEl = document.getElementById('main-nav');
+    const backToTop = document.getElementById('back-to-top');
+
+    function onScroll() {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = pct + '%';
+        navEl.classList.toggle('scrolled', scrollTop > 40);
+        backToTop.classList.toggle('show', scrollTop > 500);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    const sections = document.querySelectorAll('section[id]');
+    const navAnchors = document.querySelectorAll('.nav-links a.nav-text');
+    const sectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navAnchors.forEach(a => a.classList.remove('active'));
+                const match = document.querySelector('.nav-links a[href="#' + entry.target.id + '"]');
+                if (match) match.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-40% 0px -50% 0px' });
+    sections.forEach(s => sectionObserver.observe(s));
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('in-view');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            const circle = document.createElement('span');
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            circle.className = 'ripple';
+            circle.style.width = circle.style.height = size + 'px';
+            circle.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            circle.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            btn.appendChild(circle);
+            setTimeout(() => circle.remove(), 600);
+        });
+    });
+
+    const countEl = document.querySelector('.stat-num[data-count]');
+    if (countEl) {
+        const target = parseInt(countEl.getAttribute('data-count'), 10);
+        let current = 0;
+        const duration = 800;
+        const stepTime = 40;
+        const steps = duration / stepTime;
+        const increment = target / steps;
+        const counter = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                countEl.textContent = target;
+                clearInterval(counter);
+            } else {
+                countEl.textContent = Math.floor(current);
+            }
+        }, stepTime);
+    }
+
+    document.querySelectorAll('img.img-loading').forEach(img => {
+        const reveal = () => img.classList.remove('img-loading');
+        if (img.complete) reveal();
+        else {
+            img.addEventListener('load', reveal);
+            img.addEventListener('error', reveal);
+        }
     });
 </script>
 
