@@ -130,8 +130,34 @@
         }
         @keyframes ripple-anim { to { transform: scale(3.5); opacity: 0; } }
 
-        .hero { text-align: center; padding: 100px 0 80px; background: radial-gradient(circle at top, #16143a 0%, #050505 65%); }
+        .hero { text-align: center; padding: 100px 0 80px;  position: relative; overflow: hidden; }
 
+        .hero { position: relative; overflow: hidden; }
+
+        .hero-video {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: 0;
+            object-fit: cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 5, 5, 0.75);
+            z-index: 1;
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 2;
+        }
+        
         .hero-badge {
             display: inline-flex;
             align-items: center;
@@ -372,7 +398,7 @@
 <nav id="main-nav">
     <div class="container nav-container">
         <a href="#" class="logo">
-            <img src="images/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh Logo" class="project-logo">
+            <img src="assets/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh Logo" class="project-logo">
         </a>
         <div class="menu-toggle" id="mobile-menu" role="button" aria-label="Toggle menu">
             <span></span><span></span><span></span>
@@ -388,6 +414,10 @@
 </nav>
 
 <header class="hero">
+    <video autoplay muted loop playsinline class="hero-video">
+        <source src="assets/8189164-uhd_3840_2160_25fps.mp4" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>  
     <div class="container">
         <div class="hero-badge"><span class="pulse-dot"></span>Now in Development</div>
         <h1>Level up your business.<br><span class="gradient-text">With AI.</span></h1>
@@ -424,7 +454,8 @@
                 <div class="who-icon"><i class="fa-solid fa-laptop-code"></i></div>
                 <div>
                     <div class="who-label">Freelancers</div>
-                    <div class="who-sub">Designers, developers, writers, consultants</div>
+       
+           <div class="who-sub">Designers, developers, writers, consultants</div>
                 </div>
             </div>
             <div class="who-card reveal">
@@ -581,10 +612,10 @@
         <p>Coming soon to iOS, Android, and Web. Early access to be announced.</p>
         <div class="store-badges">
             <a href="#">
-                <img src="images/iphone-app-store-android-coming-soon.jpg" alt="Coming soon to the App Store" class="img-loading">
+                <img src="assets/iphone-app-store-android-coming-soon.jpg" alt="Coming soon to the App Store" class="img-loading">
             </a>
             <a href="#">
-                <img src="images/google-play-badge-coming-soon-610x199.png" alt="Coming soon to Google Play" class="img-loading">
+                <img src="assets/" alt="Coming soon to Google Play" class="img-loading">
             </a>
         </div>
     </div>
@@ -592,7 +623,7 @@
 
 <footer>
     <div class="container">
-        <img src="images/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh" style="height: 45px; margin-bottom: 20px; opacity: 0.8;" class="img-loading">
+        <img src="assets/RocketHigh_Logo_White_Text (1).png" alt="RocketHigh" style="height: 45px; margin-bottom: 20px; opacity: 0.8;" class="img-loading">
         <div class="footer-links">
             <a href="#features">Features</a>
             <a href="#pricing">Pricing</a>
