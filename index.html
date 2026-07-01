@@ -194,8 +194,16 @@
         .hero h1 { font-size: clamp(2.2rem, 8vw, 4.2rem); line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.03em; font-weight: 800; }
         .gradient-text {
             background: linear-gradient(90deg, #7c74ff, #b1a9ff);
+
+            /* Standard property */
+            background-clip: text;
+
+            /* WebKit compatibility */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+
+            /* Optional for Firefox */
+            color: transparent;
         }
         .hero p { font-size: clamp(1rem, 3vw, 1.2rem); color: var(--text-dim); max-width: 680px; margin: 0 auto 2.5rem; }
         .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
@@ -758,6 +766,15 @@
             img.addEventListener('load', reveal);
             img.addEventListener('error', reveal);
         }
+
+        const heroVideo = document.querySelector('.hero-video');
+
+        if (heroVideo) {
+            heroVideo.muted = true;
+            heroVideo.play().catch(() => {
+                console.log("Autoplay prevented.");
+            });
+}
     });
 </script>
 
